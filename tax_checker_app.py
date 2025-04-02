@@ -11,7 +11,7 @@ if uploaded_file:
         df = pd.read_excel(uploaded_file)
 
         def check_tax_profiles_from_df(df):
-            feedback = []
+            messages = []
 
             def is_seven_percent(name):
                 return isinstance(name, str) and "7%" in name
@@ -19,22 +19,29 @@ if uploaded_file:
             def is_price_included(value):
                 return value == "Tax Included"
 
+            # Input VAT 7% included (Purchases)
             input_vat_7 = df[(df["type_tax_use"] == "Purchases") & (df["name"].apply(is_seven_percent))]
-            if not any(input_vat_7["price_include_override"].apply(is_price_included)):
-                feedback.append("ขาด Input VAT 7% แบบ included")
-
-            output_vat_7 = df[(df["type_tax_use"] == "Sales") & (df["name"].apply(is_seven_percent))]
-            if not any(output_vat_7["price_include_override"].apply(is_price_included)):
-                feedback.append("ขาด Output VAT 7% แบบ included")
-
-            if not feedback:
-                return "✅ สมบูรณ์"
+            if any(input_vat_7["price_include_override"].apply(is_price_included)):
+                messages.append("✅ พบ Input VAT 7% แบบ included")
             else:
-                return "❌ งานไม่สมบูรณ์ เนื่องจาก " + ", ".join(feedback)
+                messages.append("❌ ขาด Input VAT 7% แบบ included")
 
-        result = check_tax_profiles_from_df(df)
+            # Output VAT 7% included (Sales)
+            output_vat_7 = df[(df["type_tax_use"] == "Sales") & (df["name"].apply(is_seven_percent))]
+            if any(output_vat_7["price_include_override"].apply(is_price_included)):
+                messages.append("✅ พบ Output VAT 7% แบบ included")
+            else:
+                messages.append("❌ ขาด Output VAT 7% แบบ included")
+
+            return messages
+
         st.success("ผลการตรวจสอบ:")
-        st.markdown(f"**{result}**")
+        results = check_tax_profiles_from_df(df)
+        for r in results:
+            if "✅" in r:
+                st.markdown(f"<span style='color:green'>{r}</span>", unsafe_allow_html=True)
+            else:
+                st.markdown(f"<span style='color:red'>{r}</span>", unsafe_allow_html=True)
 
     except Exception as e:
         st.error(f"เกิดข้อผิดพลาดในการอ่านไฟล์: {e}")
