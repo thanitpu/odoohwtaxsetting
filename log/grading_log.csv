@@ -1,1 +1,1 @@
-student_id,student_name,filename,timestamp,result,similarity_with,similarity_score,df_string,file_hash
+student_id,student_name,filename,timestamp,result,score,feedback,similarity_with,similarity_score,file_hash,df_string
