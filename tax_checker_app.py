@@ -37,7 +37,7 @@ else:
 
 # UI Input
 with st.form("submission_form"):
-    student_id = st.text_input("📌 รหัสนิสิต")
+    student_id = st.text_input("📌 รหัสนิสิต").strip()
     uploaded_file = st.file_uploader("📤 กรุณาอัปโหลดไฟล์ Excel ที่ได้ export จาก Odoo", type=["xlsx"])
     submitted = st.form_submit_button("✅ Submit for Grading")
 
